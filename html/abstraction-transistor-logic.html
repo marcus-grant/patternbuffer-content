@@ -1,0 +1,111 @@
+<div class="cell markdown-cell">
+    <h2 id="sequential-logic-">Sequential Logic:</h2>
+    Before we covered how to create complicated combinational logic that eventually lead to the creation of an ALU (Arithmetic Logic Unit), the most central part of a processor. These were however all operations that occur (nearly) instantly after the right input combinations were given. In computing we need to be able to store variables to make the right computations to them, and we also need to be able to store the program that the processor will use to execute the right
+    instructions. In order to do this we need <strong>sequential logic</strong>, or logic that not only depends on the current input, but the previous output or state of the device.
+    <h2 id="the-digital-latch-">The Digital Latch:</h2>
+    The most simple devices in digital electronics that store information from a previous state, are latches, and the easiest one to implement using gate or transistor level design is the SR-Latch, or Set/Reset Latch, as shown below.
+
+</div>
+<div class="cell text-cell"><a href="https://hausofmark.files.wordpress.com/2015/07/440px-r-s_mk2.gif"><img class="aligncenter size-full wp-image-50" src="https://hausofmark.files.wordpress.com/2015/07/440px-r-s_mk2.gif" alt="440px-R-S_mk2" width="440" height="321" /></a></div>
+<div class="cell markdown-cell">
+
+    The common design element that allows the previous output of the device to dictate the current one is <em>feedback</em>. Below is a truth table that shows how each input and the previous state affects the outcome. Note how because the output of the SR latch is connected back into the input, the output of the latch now can stay in the same state when both inputs are low. Whenever the input is high on the set pin, the output becomes low, and the opposite is true of the reset pin.
+    When both inputs are high however, something called a <em>race condition</em> occurs. This is a very important concern in digital electonics where the output of the device becomes unpredictable due to competing output assertions. The reason it is called a race condition is because both inputs are in a race to make their output assertion first. There are various ways to add complexity to the design to overcome this problem that are beyond the scope of these posts, remember
+    I'm mostly interested in programmers becoming more aware of how their computers and their software work behind the scenes.
+
+</div>
+<div class="cell text-cell">
+    <table class="wikitable">
+        <tbody>
+            <tr>
+                <th colspan="9">SR latch operation<sup id="cite_ref-13" class="reference"><a href="https://en.wikipedia.org/wiki/Flip-flop_(electronics)#cite_note-13">[13]</a></sup></th>
+            </tr>
+            <tr>
+                <th colspan="4"><a title="State transition table" href="https://en.wikipedia.org/wiki/State_transition_table">Characteristic table</a></th>
+                <th colspan="4"><a title="Excitation table" href="https://en.wikipedia.org/wiki/Excitation_table">Excitation table</a></th>
+            </tr>
+            <tr>
+                <td><b>S</b></td>
+                <td><b>R</b></td>
+                <td><b>Q<sub>next</sub></b></td>
+                <td><b>Action</b></td>
+                <td><b>Q</b></td>
+                <td><b>Q<sub>next</sub></b></td>
+                <td><b>S</b></td>
+                <td><b>R</b></td>
+            </tr>
+            <tr>
+                <td>0</td>
+                <td>0</td>
+                <td>Q</td>
+                <td>hold state</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>X</td>
+            </tr>
+            <tr>
+                <td>0</td>
+                <td>1</td>
+                <td>0</td>
+                <td>reset</td>
+                <td>0</td>
+                <td>1</td>
+                <td>1</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>0</td>
+                <td>1</td>
+                <td>set</td>
+                <td>1</td>
+                <td>0</td>
+                <td>0</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>1</td>
+                <td>X</td>
+                <td>not allowed</td>
+                <td>1</td>
+                <td>1</td>
+                <td>X</td>
+                <td>0</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="cell markdown-cell">
+    <h2 id="the-digital-flip-flop">The Digital Flip-Flop</h2>
+    Yes, this device has a somewhat silly name, (engineers are very silly people deep down inside in the best way possible), but it is arguably one of the most important digital devices there are. What seperates a flip flop device from a latch, is that inputs and states are asserted synchronously at the edge of a clock signal. Without getting into too much detail, this allows digital systems to be easilier be synchronized to a shared system clock. In computers this is
+    <strong>extremely important</strong> since so many different components have to work together so quickly. This becomes more clear when examining this signal pattern below for one of the most used sequential devices in digital electronics, the <strong>D-Flip-Flop</strong>.
+
+</div>
+<div class="cell text-cell">
+    <div><a href="https://hausofmark.files.wordpress.com/2015/07/screen-shot-2015-07-10-at-10-00-47-am.png"><img class="aligncenter size-full wp-image-53" src="https://hausofmark.files.wordpress.com/2015/07/screen-shot-2015-07-10-at-10-00-47-am.png" alt="Screen Shot 2015-07-10 at 10.00.47 AM" width="660" height="405" /></a>From hyperphysics,</div>
+</div>
+<div class="cell markdown-cell">
+    <blockquote>The D flip-flop tries to follow the input D but cannot make the required transitions unless it is enabled by the clock. Note that if the clock is low when a transition in D occurs, the tracking transiton in Q occurs at the next upward transition of the clock."</blockquote>
+    So essentially, the device holds onto whatever the digital signal the input pin "D" has when the clock edge is reached. This design can be altered with some slight reconfigurations so that the output is only altered when <em>both the clock and and a write-enable</em> input is given. Thimark.files.wordpress.com/2015/07/pload.png"><img class="alignceam.png"><img class="aligncenter size-full wp-image-56"
+                                                                                                                                                                                                                                                                                                                                                    src="https://hausofmark.files.wordpress.com/2015/07/screen-shot-2015-07-10-at-9-49-06-am.png" alt="Screen Shot 2015-07-10 at 9.49.06 AM" width="660"
+                                                                                                                                                                                                                                                                                                                                                    height="311" /></a>
+
+                                                                                                                                                                                                                                                                                                                                                <a href="https://hausofmark.files.wordpress.com/2015/07/screen-shot-2015-07-10-at-9-49-17-am.png"><img class="aligncenter size-full wp-image-57"
+                                                                                                                                                                                                                                                                                                                                                   src="https://hausofmark.files.wordpress.com/2015/07/screen-shot-2015-07-10-at-9-49-17-am.png" alt="Screen Shot 2015-07-10 at 9.49.17 AM" width="660"
+                                                                                                                                                                                                                                                                                                                                                   height="408" /></a>
+
+                                                                                                                                                                                                                                                                                                                                                And That's it really for storage elements. Now that we know how to make complex combinational circuits and complex sequential circuits we can design a large
+                                                                                                                                                                                                                                                                                                                                                portion of the devices necessary in processors. Tune in next time where we'll go over the basics of how to coordinate all the data buses in a processor that
+                                                                                                                                                                                                                                                                                                                                                routes data from various storage elements, to/from arithmetic and data modulation elemetns to/from the peripheral bus.
+
+</div>
+<div class="cell markdown-cell">
+    <h2 id="refrences">Refrences</h2>
+    <ul>
+            <li>My own professional and academic experience as an Electrical Engineer</li>
+                <li>Hyperphysics:</li>
+                    <li>MIT OCW: Introduction to Digital Systems</li>
+    </ul>
+</div>
