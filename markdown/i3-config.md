@@ -22,60 +22,19 @@ Next, import and sign the key:
 
 ```
 
-# pacman-key -r 962DDE58
-# pacman-key --lsign-key 962DDE58
+### Binding Specific Programs to Workspaces and Terminating GUIs!
 
-Refresh the package list and upgrade the system if necessary:
+With workspaces defined the way we want them, it might be nice if certain applications only opened up in the workspace name that is associated with it. For example, I use rhythmbox as my go to music player, when I feel like working with a GUI. So how is that done? Open up a free terminal window, and I'll show walk you through it. Every window in i3 has a class name for each application, and if we find out the name of that class, we can make a config option that sticks programs of a certain class name to a specific workspace. 
 
-# pacman -Syyu
-
-Finally, install the bundle with
-
-# pacman -S infinality-bundle
+In the free terminal window, install if you haven't alread a music player, or another program you will tie to a workspace. Then open it with the terminal. Now type in `xprop` in the command line and your cursor will change into a corshair type icon. This will allow you to click on an open window and in the window you typed `xprop` you will see some output including ascii versions of that application's icon and some properties that the xserver uses to keep track of open applications. Within that list of properties there will be a line with `WM_CLASS(STRING)` that will have the program's class name. Copy it or remember it, and if there's more than one class name, just go with the first one. Open the i3 config again, and create a new section after the `#move focused container to workspace` section and create a new one for assigning apps to workspaces, and then use the `assign` config option to define where the program should open by default like so:
+```
+# workspace application assignments
+assign [class="Rhythmbox"] $workspace4
 ```
 
-### Install & Configure VNC, SSH & Encrypted VNC through SSH Tunnels
+This tells i3 that whenever Rhythmbox opens, that it should be opening in with the workspace of name $workspace4, which in the previous section was given the name "Media". Save the config file, log out then log back in and try to launch your program with the `dmenu`. Where does it open? Why on the new workspace of course, awesome!
 
-First let's take care of SSH as that gives the most utility for remote configuration anyways, and being the security nutjob that I am anyhow, I'd like to make sure everything is pretty secure from the get-go.
-Install openssh package.
-Before we configure anything about the ssh daemon, let's make a backup of the default configuration:
-```
-sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.default
-```
-Cool, now the default is there and safe, and we can always cp back to it if things go awry. First, let's configure which users get access to the system while ssh'ing into it. It is **NOT AT ALL** recommended to give root access to ssh tunellers, only allow the user account of the admin of the system(you) user access. You can still access the root with sudo when doing remote admin tasks.
-Inside `/etc/ssh/sshd_config` use this line:
-```
-AllowUsers user1 user2
-```
-And change it to whatever admin user accounts should have access. **Alternatively** you could also enable access with user groups, and since in the previous articles it was suggested that the useradd of the account for the system should be included in the `wheel` group, *the standard admin user group for arch*, it might be easier and more convenient to ignore the above line and give access to the wheel user group like below:
-```
-AllowGroups wheel
-```
-Then I **highly** recommend to disable root login with this line:
-```
-PermitRootLogin no
-```
-If you'd like to print out a banner to welcome someone into the system upon tunneling in, use the `Banner` option. Here it takes the text from the `/etc/issue` file, which is the standard linux way to display system information, which can be modified to suit whatever itch needed:
-```
-Banner /etc/issue
-```
-If you'd prefer to generate your own keys and have them be required to connect to the server, here is where you show the file that stores the key. The file shown is the standard one, but literally any name of file can be used so long it holds a properly formatted SSH key
-```
-HostKey /etc/ssh/ssh_host_rsa_key
-
-```
-If you plan on port forwarding on your router to allow SSH connections from the outside internet, it's a good idea to change the port it listens to to from the standard port 22, to a random higher one that's smaller than the maximum of  65535. Remember, the router on your network needs to port-forward to this port and the IP-Address of the computer for this to work, so look up how to port-forward online for your particular router make or model.
-```
-Port 29987
-```
-Since we are exposing our computers to the world-wide-web, it is important to be as secure as possible. Although SSH encryption and the protocol itself are quite safe, there are defaults that should be changed to reduce the likelyhood of hacking significantly. One such configuration are password logins. Because if they are enabled, even with a safe key in place, the server will default to password login if the key authentication fails, which opens the system up to fairly easy brute-force hacks. The way we prevent this is by using a config to force public key authentication, which means the only way to brute force hack into the system, is to crack the SSH key which by default is a 2048-bit key. this is essentially impossible to crack without **insane** luck, or an ability to hack the client that connects to it.
-```
-PasswordAuthentication no
-ChallengeResponseAuthentication no
-```
-
-With this feature on, it can be a real PITA to pass SSH keys between the clients you'll use to connect to this server and the server itself, so a trick I use myself is to save a version of `/etc/sshd_config` called `/etc/sshd_config.insecure` that doesn't have the above configs that enforce public key authentication so I can use the ssh client's 
-
+Being such a terminal focused window manager, it might be nice if i3 could somehow 
 
 
 ### Other packages that are straight forward either through AUR or Arch Official
@@ -86,6 +45,11 @@ With this feature on, it can be a real PITA to pass SSH keys between the clients
 
 
 
+### TODO
+- Add section for feh and exec_always and how to use it to make background image displays
+- Join stuff in byword for this article on key binds
+- Add section on workspace naming and use of i3 config file variables
+- Add section on configuring xfce4-terminal with color scheme, also link to bashrc article
 
 
 
