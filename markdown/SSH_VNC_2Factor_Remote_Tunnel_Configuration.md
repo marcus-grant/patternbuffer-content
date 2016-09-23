@@ -129,6 +129,40 @@ sudo systemctl restart sshd_config
 
 Now assuming, everything went well, even though the secure configuration is active, you should still be able to connect with the server-auditor app. Find out if it does by reconnecting to your newly defined host within the app. You should also know how to verify if you're back on the secured configuration. I'm not sure how to do that with the app, but by the end of this next section, you will know how, by checking a command line client of SSH if it can connect to the server by renaming the key file. You could also try to SSH into the server with another SSH client without a key stored on the server.
 
+For the more typical situation of havint to SSH into the server from another UNIX based OS like macOS, or another Linux installation, or even PUTTY or CygWin on Windwos, keys will have to be made for those clients as well. To do this, open up the system that will be used to SSH into the server, open its terminal application, then enter `cd ~/.ssh` if you've already installed ssh to that system. If not, do so like described before, `open-ssh` packages almost always come with the client as well as the server. While inside `.ssh` there might already be key files stored there and they're usually of the format `id_rsa` but maybe with an actual ID defined, or with a different encryption algorithm like DSA instead of RSA. Key files always come in public and private key pairs and the public key will be denoted by the `.pub` extension. To generate your own type the following:
+```
+ssh-keygen -b 4048 -t rsa -C "HOSTNAME"
+```
+
+This will take you a brief set of prompts that will generate a set of key files with a 4048-bit rsa key for the server named "HOSTNAME". The hostname I don't believe actually matters, but I've never tested it any other way so I'm not sure. Anyways, give it the hostname of the server just to be sure. It will then ask you where to save the key file and give you the default option of `HOMEORUSERS/USER/.ssh/id_rsa`. Depending on whether you're on a BSD or Linux based system (macOS is BSD based) the first directory will be either `home` or `Users` and the second will be the user name you logged in this system with. I *highly* recommend you chose a different name for the login because any other service this system uses with SSH could easily conflict with this key file. Typically I just call it `home/USERNAME/HOSTNAME_rsa` for Linux, or `Users/USERNAME/HOSTNAME_rsa` and replace the all capitalized parts with their correct names. Unfortunately some systems have a problem recognizing the '~' shortcut for the path to your users directory, so you will probably have to enter those paths explicityly as I have above. Next enter a passphrase for the key. This is definitely a good idea, because otherwise anyone using your computer will be able to login with ssh to this server, should you leave the computer unlocked and walk away. After confirming the passphrase, a random bit of ascii art should popup in the terminal confirming that the key has been generated and stored.
+
+Next, in order to make setting up SSH sessions easier, since there are so many non-default parameters to connecting to the SSH server, let's alter the ssh client config file. This will be located in the path and filename `~/.ssh/config` and should have options like these, just replace the all caps words with the appropriate parameter that reflects your server and key file information we've set up.
+```
+Host SSH_CLIENT_CONFIG_NAME
+	HostName	ADDRESS_OF_SERVER
+	Port		PORT_NUMBER
+	User		AUTHORIZED_SSH_USER_ON_SERVER
+	IdentityFile	HOME_OR_USER/USERNAME/NAME_OF_RECENTLY_GENERATED_KEYFILE
+```
+These parameters will mean that all that's needed to ssh into the new server is to enter `ssh SSH_CLIENT_CONFIG_NAME` and all of the configured parameters for that host will be applied. `SSH_CLIENT_CONFIG_NAME` can be any memorable name for that set of parameters for the connection. Usually I call it by the server I'm connecting to's hostname, and if I'm connecting to it through the internet, I'll tack on `WAN` add the end of the config name. `ADDRESS_OF_SERVER` is either the IP-address of the server if you want to connect on the local network, or the URL you've given the dynamic DNS server to point to your home's router. I like to keep the two configs seperate because if I'm not on the local network I'd like to not have to hop to the DNS server first, then back into my own network to use SSH. `AUTHORIZED_SSH_USER_ON_SERVER` is the username that you configure to be authorized to make SSH connections into the server. Incidentally, this will also be the user you logon as, with all their permissions and home folder, command prompt and whatever other terminal configurations applied. And finally `IdentityFile` is just the local path on your current client computer to the key file we've just generated. Remember SSH doesn't understand the `~` as pointing to the home directory of your logged in user, so you will have to explicityly type out `/home/USERNAME/.ssh/KEYFILE` or `Users/USERNAME/.ssh/KEYFILE` or whatever path you defined during the key generation process.
+
+Now it should be easy to connect to the SSH server once we've changed the `sshd_config` file on the SSH server to be the `NOTsecure` version we've defined specifically for the purpose for adding/removing/changing key file pairs between client and server.Change to the NOTsecure version of the config file, then restart the sshd service, and let's add this new key file to the server. Once you've tested that you can SSH in with the new client configuration you've tested above, and made the server use the not secure version of the config, use this command below to copy the keyfile to the server replacing USERNAME with the authorized user you'll use on the server, SERVER_ADDRESS with the servers address(be it URL or local IP-address), and the port number the server is configured for..
+```
+ssh-copy-id USERNAME@SERVER_ADDRESS -p PORT_NUMBER
+```
+Assuming everything works, the terminal should report a succesful copy of the key. The SSH client should now have a matching key file set both on the client and on the server side of things, and now even with the secure version of the server's `sshd_config` we should be able to access the server. **Remember** to always change back to the secure version, restart the sshd service, and check if you can connect to the server without the key file. In fact, why don't I show you how to test if you can actually get into the server without the config file now. A quick way to test if the server is secure is to create an empty file I call `ssh_test` and leaving a copy of the ssh key in question, with the name `KEY_rsa.pub.bak` always present to be copied from after the test, then retrying the same ssh command above we used to get into the server with the real key file.
+```
+cd ~/.ssh/
+touch ssh_test
+cp NAME_OF_KEYFILE.pub NAME_OF_KEYFILE.pub.bak
+cp ssh_test NAME_OF_KEYFILE.pub
+ssh CLIENT_CONFIG_NAME
+cp NAME_OF_KEYFILE.pub.bak NAME_OF_KEYFILE.pub
+```
+
+Just make sure there's always a copy of the recently generated keyfile lying around and you'll be able to very easily test with the `ssh` command and the config we just created see if the server is in fact secured properly. This should **always** be the last step with any changes to the SSH server, because if it isn't secured because you made some silly mistake, it could compromise not just your servers safety and the data stored within, but the safety of your entire network because a hacker could get in, carefully make small changes that will leave him with a backdoor into your network where they can do whatever they'd like on the sly.
+
+
 
 ### Paranoid-level security measure
 
@@ -144,3 +178,6 @@ If brute-force attacks scare you, there's several ways to bolster your servers s
 - [DigitalOcean: How To Install & Configure VNC Remote Access](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-vnc-remote-access-for-the-gnome-desktop-on-centos-7)
 - [Github: Authy](https://github.com/authy/authy-ssh)
 
+
+### TODO
+- Add putty or cygwin keygen instructions in
