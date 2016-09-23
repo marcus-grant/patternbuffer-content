@@ -62,6 +62,7 @@ Here is another truly non-optional configuration you shouldn't ignore. If you're
 ```
 PasswordAuthentication no
 ChallengeResponseAuthentication no
+UsePAM no
 ```
 
 The reason the above configuration is so important, is because of the way `openssh` is setup. If you try and login to an SSH server without this option, the default behavior when SSH key authentication fails is to default to password authentication. This password is the same one you used to login to your server, and this password after a failed attempt at access through SSH becomes exposed to **ADD REF HERE** fairly rudimentary brute-force attacks, which frankly makes these two options the most important in the guide to get right if security of the server is of concern, and it should be. 
@@ -148,9 +149,9 @@ These parameters will mean that all that's needed to ssh into the new server is 
 
 Now it should be easy to connect to the SSH server once we've changed the `sshd_config` file on the SSH server to be the `NOTsecure` version we've defined specifically for the purpose for adding/removing/changing key file pairs between client and server.Change to the NOTsecure version of the config file, then restart the sshd service, and let's add this new key file to the server. Once you've tested that you can SSH in with the new client configuration you've tested above, and made the server use the not secure version of the config, use this command below to copy the keyfile to the server replacing USERNAME with the authorized user you'll use on the server, SERVER_ADDRESS with the servers address(be it URL or local IP-address), and the port number the server is configured for..
 ```
-ssh-copy-id USERNAME@SERVER_ADDRESS -p PORT_NUMBER
+ssh-copy-id -i /PATH/TO/KEYFILE -p PORT_NUMBER USERNAME@SERVER_ADDRESS
 ```
-Assuming everything works, the terminal should report a succesful copy of the key. The SSH client should now have a matching key file set both on the client and on the server side of things, and now even with the secure version of the server's `sshd_config` we should be able to access the server. **Remember** to always change back to the secure version, restart the sshd service, and check if you can connect to the server without the key file. In fact, why don't I show you how to test if you can actually get into the server without the config file now. A quick way to test if the server is secure is to create an empty file I call `ssh_test` and leaving a copy of the ssh key in question, with the name `KEY_rsa.pub.bak` always present to be copied from after the test, then retrying the same ssh command above we used to get into the server with the real key file.
+Assuming everything works, the terminal should report a succesful copy of the key. Be sur to specify which key file to send, because if you already have SSH keys in there, you could end up sending a copy to another web service's SSH file. The SSH client should now have a matching key file set both on the client and on the server side of things, and now even with the secure version of the server's `sshd_config` we should be able to access the server. **Remember** to always change back to the secure version, restart the sshd service, and check if you can connect to the server without the key file. In fact, why don't I show you how to test if you can actually get into the server without the config file now. A quick way to test if the server is secure is to create an empty file I call `ssh_test` and leaving a copy of the ssh key in question, with the name `KEY_rsa.pub.bak` always present to be copied from after the test, then retrying the same ssh command above we used to get into the server with the real key file.
 ```
 cd ~/.ssh/
 touch ssh_test
@@ -161,7 +162,8 @@ cp NAME_OF_KEYFILE.pub.bak NAME_OF_KEYFILE.pub
 ```
 
 Just make sure there's always a copy of the recently generated keyfile lying around and you'll be able to very easily test with the `ssh` command and the config we just created see if the server is in fact secured properly. This should **always** be the last step with any changes to the SSH server, because if it isn't secured because you made some silly mistake, it could compromise not just your servers safety and the data stored within, but the safety of your entire network because a hacker could get in, carefully make small changes that will leave him with a backdoor into your network where they can do whatever they'd like on the sly.
-
+ 
+**Add something about chmod 400 on keyfiles**
 
 
 ### Paranoid-level security measure

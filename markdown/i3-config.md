@@ -56,7 +56,7 @@ Finally, all you need to do know is go the font-awesome [cheat-sheet](http://fon
 ```
 set $workspace4 "Media "
 ```
-Now this could easily be shown as an unknown unicode character, and there could be several reasons for this, but it doesn't really matter for the scope of this article. If you save the config and restart i3 everything should look as expected if you open the workspace with the icon defined.
+Now this could easily be shown as an unknown unicode character, but that shouldn't matter, after saving the config, and restarting i3, the workspace defined with the name with the new icon should now be rendered with the correct icon. If you go back to the config file, the same should be true of its name definition, this is due to the fact that the xsession likely needs to be restarted in order to make use of the new font files. 
 
 
 Being such a terminal focused window manager, it might be nice if i3 could somehow 
