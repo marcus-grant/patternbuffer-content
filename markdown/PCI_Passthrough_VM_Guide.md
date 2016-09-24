@@ -1,0 +1,26 @@
+# Installing a guest VM with PCI Passthrough
+To start this article, I'll express why I would go through this rather complicated procedure for installing, configuring and running a VM with direct access to the PCI bus. I **hate** windows. Back in XP days which I actually remember fairly fondly, I would say Microsoft was at the top of their game, and had a brief bounce back during with 7. But now with Windows 10 being an unreliable bastard that gives me more headaches than even some of the more difficult Linux distributions, I really have to ask myself, why do always need to keep at least one Windows machine around? One word, games. Coming home from work, sometimes I just want to zone out and play something, and as many great strides Linux has made in terms of courting more game studios, including Valve's massive contributions to Linux games, there's still just too many that are Windows exclusives that I need to keep a windows gaming system around. So for a long time I've been dual booting Arch Linux with Windows, and although it's not a bad solution, you just can't beat the convenience of running a VM with near-native performance. This also gives me the infrastructure to run other OS's to experiment with things, and having a *always* on OS to run background tasks like my own cloud server, Plex server, etc. So if I get the urge to play a game, or need proprietary content-creation software like Ableton, Creative-Suite, orEngineering software like Fusion 360 or FPGA software, all I need to do now is run my script to launch the Windows VM, flick the switch on my DIY hardware KVM (*build-log coming soon*) and presto, with my fastest SSD storing the VM, I'm looking at the Windows login screen in under 20 seconds. And because every file is hosted on the OS hosting the VM, all my files are synced and available through the virtual network port.
+
+### Install & Setup
+
+Let's leave any more editorial comments or conclusions after actually setting up the system and testing it. Most credit in terms of researching how to do this goes to [1][hkemler] on the *pcmasterrace* subreddit for posting a terrific guide, and as always the loaded, yet not always straight-forward [2][Arch Wiki]. The software stack that's necessary to make this all work correctly on the host operating system goes as follows:
+- KVM
+	- A [hypervisor][3] which provides the abstraction layer between your physical hardware and the virtualization layer, making it seem for the guest OS that it is in fact running on its own hardware, when in fact it's running on a provisioning of the actual hardware on top of the hypervisor. Instead of providing firmware support for the specific hardware, the hypervisor must support the hardware it is installed on, and provides virtual hardware for the Virtual Machine. So in short, if the hypervisor supports the hardware, and if the hypervisor has virtual drivers and firmware for the guest OS, everything should work.
+- QEMU
+	- If the hypervisor provides the abstraction layer between hardware and virtual machine, QEMU is there to provision hardware resources between the host OS and the guest. It will also emulate the hardware components so it looks like normal hardware to the guest OS
+- VirtIO
+	- A virtualization standard for computer compenents connected to the IO bus (think network interfaces, storage controllers, etc.). This also recompiles the guest OS so that it works as cleanly in a Virtual Machine host as possible
+- VirtFS
+	- The file system used for creating virtual disk files, that emulate the existense of an individual disk, when in fact it is a file inside a physical disk. It's specifically made to handle the complications of having a host OS using a physical disk, while also allowing full emulation of the functions a stand alone disk would have while only being a virtual filesystem. If you're familiar with Docker volumes, VirtFS is equivalent to them
+- VFIO
+	- This is where the magic happens, we've all likely used a virtual machine before and accepted the fact that graphics performance would be decidedly weak. But with the advent of CPU's and motherboards that support passing the PCI bus directly to the virtualization layer, it is now possible to connect to whatever device is on the PCI bus (including graphics cards) and use them at near-native speeds, assuming the PCI bus isn't being saturated by other virtualized guest OS's or the host OS. VFIO allows the host OS to provision what virtual machines get access to what hardware on the bus, and performas all the memory maps necessary to make the guest OS able to use these devices.
+- Libvirt
+	- A collection of software that provides a convenient way to manage virtual machines and virtualization functionality like storage, network, audio mixing, etc.
+
+
+
+### References
+[1](https://www.reddit.com/r/pcmasterrace/comments/3lno0t/gpu_passthrough_revisited_an_updated_guide_on_how/)r/pcmasterrace post on installing Windows 10 with QEMU/KVM on Arch
+[2](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF)Arch Wiki: PCI Passthrough via OVMF
+[3](https://en.wikipedia.org/wiki/Hypervisor) Wikipedia article on Hypervisors
+[4](http://lime-technology.com/wiki/index.php/UnRAID_6/VM_Management)Lime Technology Docs: VM_Management
