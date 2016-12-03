@@ -2,7 +2,7 @@
 
 I often find myself wishing I could configure, or simply perform mundane tasks on my server from the convenient location of anywhere. So I learned how to configure SSH & VNC servers and clients on my various systems that would enable me to do so. There is a big caveat of enabling access to your system from anywhere, it also opens up access for **anyone** anywhere. Without encrypted public key access being enforced on your system this convenience very quickly becomes a liability that endangers all your personal information to would-be hackers. Without proper security precautions, all that's required to hack into the server, where the `openssh` or VNC server of your choice is installed can fairly easily be hacked into using fairly rudimentary [brute-force attacks](https://en.wikipedia.org/wiki/Brute-force_attack). Admittedly the lengths I go through to secure my devices and network can be a bit paranoid, however, I'll be pointing out the **absolute minimum** steps you should take should you decide expose your server to the internet, on-top of the more paranoid approach of using [two-factor authentication](https://en.wikipedia.org/wiki/Multi-factor_authentication) using Google Authentication, which adds another layer of security on-top of the already *nearly* impossible to crack SSH public key. I'll also be going over some tips and tricks to make generating the public key on your client and passing it onto the server easier, on-top of all the installs and configurations of the server. So enjoy.
 
-
+### Before publishing make descriptions more brief, but more importantly have highlighted overview of the commands
 
 ### Disclaimer
 
