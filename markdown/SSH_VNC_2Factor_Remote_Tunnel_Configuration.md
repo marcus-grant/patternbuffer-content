@@ -64,6 +64,7 @@ PasswordAuthentication no
 ChallengeResponseAuthentication no
 UsePAM no
 ```
+**PAM needs research, might be ok to use with challenge set to no**
 
 The reason the above configuration is so important, is because of the way `openssh` is setup. If you try and login to an SSH server without this option, the default behavior when SSH key authentication fails is to default to password authentication. This password is the same one you used to login to your server, and this password after a failed attempt at access through SSH becomes exposed to **ADD REF HERE** fairly rudimentary brute-force attacks, which frankly makes these two options the most important in the guide to get right if security of the server is of concern, and it should be.
 
